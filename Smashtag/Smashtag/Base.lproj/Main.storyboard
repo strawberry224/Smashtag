@@ -77,6 +77,12 @@
                             </textField>
                         </barButtonItem>
                     </navigationItem>
+                    <refreshControl key="refreshControl" opaque="NO" multipleTouchEnabled="YES" contentMode="center" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" id="vuo-7F-Tj8">
+                        <autoresizingMask key="autoresizingMask"/>
+                        <connections>
+                            <action selector="refresh:" destination="GTa-Ou-ziT" eventType="valueChanged" id="cjH-YF-b89"/>
+                        </connections>
+                    </refreshControl>
                     <connections>
                         <outlet property="searchTextField" destination="QXK-xN-3fJ" id="bgC-aN-JLG"/>
                     </connections>

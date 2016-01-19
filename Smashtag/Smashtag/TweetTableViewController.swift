@@ -14,6 +14,7 @@ class TweetTableViewController: UITableViewController, UITextFieldDelegate {
     
     var searchText: String? = "#stanford" {
         didSet {
+            lastSuccessfulRequest = nil
             searchTextField?.text = searchText
             tweets.removeAll()
             tableView.reloadData()
@@ -28,17 +29,44 @@ class TweetTableViewController: UITableViewController, UITextFieldDelegate {
         refresh()
     }
     
+    var lastSuccessfulRequest: TwitterRequest?
+    
+    var nextRequestToAttempt: TwitterRequest? {
+        if lastSuccessfulRequest == nil {
+            if searchText != nil {
+                return TwitterRequest(search: searchText!, count: 100)
+            } else {
+                return nil
+            }
+        } else {
+            return lastSuccessfulRequest!.requestForNewer
+        }
+    }
+    
     func refresh() {
+        if refreshControl != nil {
+            refreshControl?.beginRefreshing()
+        }
+        refresh(refreshControl)
+    }
+    
+    
+    @IBAction func refresh(sender: UIRefreshControl?) {
         if searchText != nil {
-            let request = TwitterRequest(search: searchText!, count: 100)
-            request.fetchTweets { (newTweets) -> Void in
-                dispatch_async(dispatch_get_main_queue()) { () -> Void in
-                    if newTweets.count > 0 {
-                        self.tweets.insert(newTweets, atIndex: 0)
-                        self.tableView.reloadData()
+            if let request = nextRequestToAttempt {
+                request.fetchTweets { (newTweets) -> Void in
+                    dispatch_async(dispatch_get_main_queue()) { () -> Void in
+                        if newTweets.count > 0 {
+                            self.lastSuccessfulRequest = request
+                            self.tweets.insert(newTweets, atIndex: 0)
+                            self.tableView.reloadData()
+                            sender?.endRefreshing()
+                        }
                     }
                 }
             }
+        } else {
+            sender?.endRefreshing()
         }
     }
     
